@@ -3,3 +3,7 @@
 # deliberately persisted on the host, but it is not part of this repository.
 /data/
 
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

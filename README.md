@@ -4,13 +4,13 @@ This standalone project containerizes [`StefanMaron/bc-code-atlas`](https://gith
 
 The image runs all five cooperating processes and exposes only the unified MCP endpoint on port 8800. Corpus, indexes, model cache, and on-demand version data remain persistent outside image layers.
 
-The container creates a local `./data` directory during first-start bootstrap. It contains downloaded upstream AL source and Microsoft documentation, generated indexes, and other runtime state. It is intentionally excluded from Git and is not part of this repository's source.
+The container creates a local `./data` directory during first-start bootstrap. It contains downloaded upstream AL source and Microsoft documentation, generated indexes, and other runtime state. It is intentionally excluded from Git and is not part of the [`bc-code-atlas-container`](https://github.com/dam-pav/bc-code-atlas-container) source.
 
 ## Requirements
 
 This project builds and runs a **Linux container**. The Docker host must support Linux containers; Windows containers are not supported. Run it with a regular Docker Engine installation or another Linux container platform such as Kubernetes. Portainer deployments must target an environment capable of running Linux containers.
 
-The deployment definitions in this repository target Docker Compose and Portainer. Kubernetes requires equivalent workload, service, health-probe, and persistent-volume manifests, which are not currently included. CLI deployment requires Docker Engine with the Docker Compose plugin. GPU deployment also requires a supported NVIDIA GPU, driver, and container runtime integration.
+The deployment definitions in [`bc-code-atlas-container`](https://github.com/dam-pav/bc-code-atlas-container) target Docker Compose and Portainer. Kubernetes requires equivalent workload, service, health-probe, and persistent-volume manifests, which are not currently included. CLI deployment requires Docker Engine with the Docker Compose plugin. GPU deployment also requires a supported NVIDIA GPU, driver, and container runtime integration.
 
 ## Deployment
 
@@ -36,7 +36,7 @@ Use this workflow from a terminal on the Docker host.
 CPU is the default. For CUDA, install the NVIDIA Container Toolkit and use both Compose files for every command:
 
 ```bash
-docker compose -f compose.yaml -f compose.gpu.yaml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
 ```
 
 To include a specific upstream tag, branch, or commit in the image, set `BC_CODE_ATLAS_REF` before building:
@@ -50,14 +50,14 @@ BC_CODE_ATLAS_REF=<git-ref> docker compose build
 Use this workflow entirely through the Portainer UI.
 
 1. In Portainer, open **Stacks**, select **Add stack**, and choose **Git repository**.
-2. Enter this project's Git repository URL and select the branch or tag to deploy. This is the containerization repository, not the upstream `bc-code-atlas` repository. Leave **Authentication** disabled because this repository is public.
-3. Set **Compose path** to `compose.yaml`.
+2. Enter `https://github.com/dam-pav/bc-code-atlas-container` as the Git repository URL and select the branch or tag to deploy. This is the containerization repository, not the upstream `bc-code-atlas` repository. Leave **Authentication** disabled because the containerization repository is public.
+3. Set **Compose path** to `docker-compose.yml`.
 4. On a Docker Standalone environment, set **Local filesystem path** to a stable, writable host directory. The relative `./data` bind mount is created beneath this directory and must remain available across stack updates.
 5. Under **Environment variables**, add any values from `.env.example` that should differ from their defaults, including `BC_CODE_ATLAS_REF` when deploying a particular upstream version. No bootstrap variable is needed.
 6. Select **Deploy the stack**, then follow the container logs. The first start downloads the source corpora and builds the indexes before starting the MCP servers, which can take a long time.
 7. When the logs report `Bootstrap complete`, the container continues into normal service startup. Subsequent deployments reuse the initialized data.
 
-Portainer Business Edition can apply `compose.gpu.yaml` through **Additional paths** for an NVIDIA deployment; keep `compose.yaml` as the main Compose path. The Docker host must already have the NVIDIA Container Toolkit. Without the additional file, the Portainer deployment uses CPU.
+Portainer Business Edition can apply `docker-compose.gpu.yml` through **Additional paths** for an NVIDIA deployment; keep `docker-compose.yml` as the main Compose path. The Docker host must already have the NVIDIA Container Toolkit. Without the additional file, the Portainer deployment uses CPU.
 
 Portainer clones the Git repository when deploying a Git-backed stack and does not initialize its submodules. This deployment does not rely on Portainer's submodule support: the Docker build fetches the upstream application and the bootstrap process fetches its corpus submodules. See the [Portainer Git stack documentation](https://docs.portainer.io/sts/user/docker/stacks/add) for the current field descriptions and GitOps update options.
 
