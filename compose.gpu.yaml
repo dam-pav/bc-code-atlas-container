@@ -1,0 +1,12 @@
+services:
+  bc-code-atlas:
+    environment:
+      BCATLAS_EMBEDDING_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+

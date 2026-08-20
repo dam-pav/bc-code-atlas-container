@@ -1,0 +1,5 @@
+# Runtime corpus, generated indexes, Git mirrors, and warm version artifacts.
+# This directory is populated by the container's first-start bootstrap and is
+# deliberately persisted on the host, but it is not part of this repository.
+/data/
+

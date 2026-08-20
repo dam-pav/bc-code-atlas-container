@@ -1,0 +1,38 @@
+services:
+  bc-code-atlas:
+    build:
+      context: .
+      args:
+        BC_CODE_ATLAS_REPOSITORY: "${BC_CODE_ATLAS_REPOSITORY:-https://github.com/StefanMaron/bc-code-atlas.git}"
+        BC_CODE_ATLAS_REF: "${BC_CODE_ATLAS_REF:-master}"
+    image: bc-code-atlas:local
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1',8800),5); s.close()"]
+      interval: 30s
+      timeout: 5s
+      start_period: "${BCATLAS_HEALTH_START_PERIOD:-4h}"
+      retries: 5
+    ports:
+      - "${BCATLAS_PORT:-8800}:8800"
+    environment:
+      AGGREGATOR_PUBLIC_HOSTNAME: "${AGGREGATOR_PUBLIC_HOSTNAME:-}"
+      BCATLAS_BUILD_MAX_CONCURRENT: "${BCATLAS_BUILD_MAX_CONCURRENT:-1}"
+      BCATLAS_BUILD_MIN_OVERLAP_RATIO: "${BCATLAS_BUILD_MIN_OVERLAP_RATIO:-0.5}"
+      BCATLAS_CCC_STALL_TIMEOUT_S: "${BCATLAS_CCC_STALL_TIMEOUT_S:-300}"
+      BCATLAS_CCC_INDEX_MAX_TOTAL_S: "${BCATLAS_CCC_INDEX_MAX_TOTAL_S:-14400}"
+      BCATLAS_EMBEDDING_DEVICE: "${BCATLAS_EMBEDDING_DEVICE:-cpu}"
+      BCATLAS_EMBEDDING_MODEL: "${BCATLAS_EMBEDDING_MODEL:-ibm-granite/granite-embedding-97m-multilingual-r2}"
+      BCATLAS_WARM_DISK_BUDGET_BYTES: "${BCATLAS_WARM_DISK_BUDGET_BYTES:-53687091200}"
+      BCATLAS_WATCH_INTERVAL_SECONDS: "${BCATLAS_WATCH_INTERVAL_SECONDS:-}"
+      GRAPHIFY_MAX_GRAPH_BYTES: "${GRAPHIFY_MAX_GRAPH_BYTES:-1GB}"
+      GRAPHIFY_INSTRUCTIONS: "${GRAPHIFY_INSTRUCTIONS:-}"
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      - ./data:/app/data
+      - huggingface-cache:/root/.cache/huggingface
+      - cocoindex-runtime:/root/.cocoindex_code
+volumes:
+  huggingface-cache:
+  cocoindex-runtime:
